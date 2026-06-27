@@ -7,773 +7,470 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-/* ===== FONTS ===== */
-@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Special+Elite&family=IM+Fell+English:ital@0;1&display=swap');
+/*
+  CZCIONKI — INSTRUKCJA DLA DEWELOPERA:
+  1. Wrzuć pliki .ttf / .woff2 do folderu /fonts/
+  2. Dodaj @font-face poniżej, np:
+     @font-face { font-family: 'MojaFontCzcionka'; src: url('fonts/moja.ttf'); }
+  3. Dodaj opcję do tablicy CUSTOM_FONTS w JS (na dole pliku)
 
-/* Custom font slots — deweloper wrzuca pliki do /fonts/ */
+  STEMPLE OBRAZKOWE — INSTRUKCJA:
+  1. Wrzuć pliki .png do folderu /assets/
+  2. Nazwy plików = nazwy stempli, np: tajne.png, kopia.png
+  3. Dodaj nazwy do tablicy ASSET_STAMPS w JS (na dole pliku)
+*/
+
+/* Google Fonts — działają online. Offline: zastąp własnymi @font-face */
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Special+Elite&family=IM+Fell+English:ital@0;1&family=UnifrakturMaguntia&display=swap');
+
+/* Własne fonty dewelopera: */
 /* @font-face { font-family: 'MojaFontCzcionka'; src: url('fonts/moja.ttf'); } */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #1a1a1f;
-  --panel: #21212a;
-  --panel2: #292934;
-  --border: #3a3a4a;
+  --bg: #16161d;
+  --panel: #1e1e28;
+  --panel2: #26262f;
+  --border: #35354a;
+  --border2: #45455a;
   --accent: #c0392b;
   --accent2: #8b1a1a;
-  --text: #e8e4d9;
-  --text-dim: #888899;
-  --text-dimmer: #555566;
-  --paper: #f5f0e8;
-  --paper-dark: #e8e2d4;
-  --ink: #1a1a1a;
-  --ink-dim: #3a3a3a;
-  --stamp-red: #c0392b;
+  --text: #ddd8cc;
+  --text-dim: #80809a;
+  --text-dimmer: #50505f;
+  --paper: #f4efe5;
+  --ink: #111111;
+  --stamp-red: #b52020;
   --stamp-blue: #1a3a6b;
-  --radius: 6px;
-  --font-ui: 'Segoe UI', system-ui, sans-serif;
+  --radius: 5px;
+  --ui: 'Segoe UI', system-ui, sans-serif;
 }
 
-html, body { height: 100%; overflow: hidden; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--ui); }
+body { display: flex; flex-direction: column; }
 
-body {
-  font-family: var(--font-ui);
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  flex-direction: column;
-}
-
-/* ===== TOPBAR ===== */
+/* ===================== TOPBAR ===================== */
 #topbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 0 16px;
-  height: 48px;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-  z-index: 100;
-}
-
-#topbar h1 {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  margin-right: 8px;
-}
-
-.top-sep { width: 1px; height: 24px; background: var(--border); }
-
-.top-btn {
   display: flex; align-items: center; gap: 6px;
-  padding: 5px 12px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  font-size: 12px;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: var(--font-ui);
-  white-space: nowrap;
-}
-.top-btn:hover { background: var(--panel2); border-color: #555566; }
-.top-btn.danger { border-color: var(--accent2); color: #e88; }
-.top-btn.danger:hover { background: #2a1515; }
-.top-btn.primary { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; }
-.top-btn.primary:hover { background: #a93226; }
-
-.top-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
-
-#font-select {
-  background: var(--panel2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 4px 8px;
-  border-radius: var(--radius);
-  font-size: 12px;
-  font-family: var(--font-ui);
-  cursor: pointer;
-}
-
-/* ===== LAYOUT ===== */
-#app {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-/* ===== SIDEBAR ===== */
-#sidebar {
-  width: 220px;
-  flex-shrink: 0;
+  padding: 0 12px; height: 44px;
   background: var(--panel);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.sidebar-section {
   border-bottom: 1px solid var(--border);
-  padding: 12px 10px;
+  flex-shrink: 0; z-index: 100; flex-wrap: wrap;
+}
+#topbar-title {
+  font-size: 12px; font-weight: 700; letter-spacing: .06em;
+  color: var(--text-dim); text-transform: uppercase; margin-right: 4px; white-space: nowrap;
+}
+.tsep { width: 1px; height: 22px; background: var(--border); margin: 0 2px; flex-shrink: 0; }
+
+/* Top buttons */
+.tbtn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: transparent; color: var(--text);
+  font-size: 12px; cursor: pointer; transition: all .12s; font-family: var(--ui);
+  white-space: nowrap; height: 28px;
+}
+.tbtn:hover { background: var(--panel2); border-color: var(--border2); }
+.tbtn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.tbtn.primary:hover { background: #a02020; }
+.tbtn svg { width: 13px; height: 13px; flex-shrink: 0; }
+
+/* Format toolbar */
+#fmt-bar {
+  display: flex; align-items: center; gap: 2px;
+  background: var(--panel); border-bottom: 1px solid var(--border);
+  padding: 4px 12px; height: 36px; flex-shrink: 0; flex-wrap: wrap;
+}
+.fbtn {
+  width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+  border-radius: 4px; border: 1px solid transparent; background: transparent;
+  color: var(--text); cursor: pointer; font-family: var(--ui); font-size: 13px;
+  transition: all .1s; flex-shrink: 0;
+}
+.fbtn:hover { background: var(--panel2); border-color: var(--border); }
+.fbtn.active { background: var(--panel2); border-color: var(--border2); color: #fff; }
+.fbtn-sep { width: 1px; height: 18px; background: var(--border); margin: 0 3px; }
+
+#fmt-fontname {
+  background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+  padding: 2px 6px; border-radius: var(--radius); font-size: 12px; font-family: var(--ui);
+  cursor: pointer; height: 26px; max-width: 160px;
+}
+#fmt-fontsize {
+  background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+  padding: 2px 4px; border-radius: var(--radius); font-size: 12px; font-family: var(--ui);
+  cursor: pointer; height: 26px; width: 56px;
+}
+#fmt-color {
+  width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 4px;
+  padding: 2px; background: transparent; cursor: pointer;
 }
 
-.sidebar-title {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--text-dimmer);
-  text-transform: uppercase;
-  margin-bottom: 8px;
-  padding: 0 2px;
+/* ===================== LAYOUT ===================== */
+#app { display: flex; flex: 1; overflow: hidden; }
+
+/* ===================== SIDEBAR ===================== */
+#sidebar {
+  width: 210px; flex-shrink: 0;
+  background: var(--panel); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden;
+}
+.ss { border-bottom: 1px solid var(--border); padding: 10px 8px; }
+.ss-title {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em; color: var(--text-dimmer);
+  text-transform: uppercase; margin-bottom: 7px; padding: 0 2px;
 }
 
-/* Template thumbnails */
-.template-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+/* Templates */
+.tpl-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 8px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--panel2);
+  color: var(--text); cursor: pointer; transition: all .12s;
+  text-align: left; font-family: var(--ui); width: 100%; margin-bottom: 4px;
 }
-
-.template-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--panel2);
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.15s;
-  text-align: left;
-  font-family: var(--font-ui);
-  width: 100%;
+.tpl-btn:hover { border-color: var(--border2); background: #2a2a35; }
+.tpl-btn.active { border-color: var(--accent); background: #2a1010; }
+.tpl-thumb {
+  width: 24px; height: 32px; background: var(--paper); border-radius: 2px;
+  flex-shrink: 0; display: flex; flex-direction: column; padding: 3px 2px; gap: 2px;
 }
-.template-btn:hover { border-color: #666677; background: #2d2d3a; }
-.template-btn.active { border-color: var(--accent); background: #2a1515; }
-
-.tpl-icon {
-  width: 28px; height: 36px;
-  background: var(--paper);
-  border-radius: 2px;
-  flex-shrink: 0;
-  display: flex; flex-direction: column;
-  padding: 3px 2px;
-  gap: 2px;
-}
-.tpl-line { height: 2px; background: #aaa; border-radius: 1px; }
-.tpl-line.short { width: 60%; }
-.tpl-line.thick { height: 3px; background: #666; }
-.tpl-line.gap { margin-top: 2px; }
-
+.tl { height: 2px; background: #aaa; border-radius: 1px; }
+.tl.w60 { width: 60%; }
+.tl.h3 { height: 3px; background: #777; }
+.tl.mt { margin-top: 2px; }
 .tpl-info { display: flex; flex-direction: column; }
 .tpl-name { font-size: 12px; font-weight: 600; }
 .tpl-desc { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
 
-/* Tool buttons */
-.tool-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+/* Tool items — DRAGGABLE */
+.tool-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 6px 8px; border-radius: var(--radius);
+  border: 1px solid transparent; background: transparent;
+  color: var(--text); cursor: grab; transition: all .12s;
+  font-family: var(--ui); font-size: 12px; width: 100%; user-select: none;
+}
+.tool-item:hover { background: var(--panel2); border-color: var(--border); }
+.tool-item:active { cursor: grabbing; }
+.tool-item.dragging { opacity: .4; }
+.ti { font-size: 13px; width: 18px; text-align: center; flex-shrink: 0; }
+
+/* Stamp items */
+.stamp-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 8px; border-radius: var(--radius);
+  border: 1px solid transparent; background: transparent;
+  color: var(--text); cursor: grab; transition: all .12s;
+  font-family: var(--ui); font-size: 11px; width: 100%; user-select: none; margin-bottom: 3px;
+}
+.stamp-item:hover { background: var(--panel2); border-color: var(--border); }
+.stamp-preview {
+  font-size: 10px; font-weight: 900; border: 2px solid; padding: 1px 5px;
+  border-radius: 2px; transform: rotate(-6deg); line-height: 1; white-space: nowrap;
+}
+.stamp-preview.red { color: var(--stamp-red); border-color: var(--stamp-red); }
+.stamp-preview.blue { color: var(--stamp-blue); border-color: var(--stamp-blue); }
+.stamp-preview.img { border: none; transform: none; font-size: 18px; }
+
+/* Custom stamp button */
+.add-stamp-btn {
+  width: 100%; padding: 5px 8px; font-size: 11px; color: var(--text-dim);
+  background: transparent; border: 1px dashed var(--border); border-radius: var(--radius);
+  cursor: pointer; font-family: var(--ui); text-align: center; margin-top: 4px;
+  transition: all .12s;
+}
+.add-stamp-btn:hover { border-color: var(--border2); color: var(--text); background: var(--panel2); }
+
+/* ===================== DROP INDICATOR ===================== */
+.drop-line {
+  height: 3px; background: #4466ff; border-radius: 2px;
+  margin: 0; pointer-events: none;
+  box-shadow: 0 0 6px #4466ff88;
 }
 
-.tool-btn {
-  display: flex; align-items: center; gap: 8px;
-  padding: 7px 10px;
-  border-radius: var(--radius);
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
-  transition: all 0.15s;
-  text-align: left;
-  font-family: var(--font-ui);
-  font-size: 12px;
-  width: 100%;
-}
-.tool-btn:hover { background: var(--panel2); border-color: var(--border); }
-.tool-btn:active { transform: scale(0.97); }
-
-.tool-icon {
-  font-size: 14px;
-  width: 20px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-/* Stamp color pickers */
-.stamp-row {
-  display: flex; gap: 6px; margin-top: 4px;
-}
-.stamp-opt {
-  flex: 1;
-  padding: 5px 4px;
-  font-size: 10px;
-  font-weight: 700;
-  border-radius: 3px;
-  border: 1px solid;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.15s;
-  font-family: var(--font-ui);
-  letter-spacing: 0.05em;
-}
-.stamp-opt.red { background: #2a1010; border-color: var(--accent); color: #e07070; }
-.stamp-opt.blue { background: #0d1a2e; border-color: #2a5ca8; color: #7099e0; }
-.stamp-opt.red:hover { background: var(--accent); color: white; }
-.stamp-opt.blue:hover { background: #1a3a7a; color: white; }
-
-/* ===== CANVAS AREA ===== */
+/* ===================== CANVAS ===================== */
 #canvas-area {
-  flex: 1;
-  overflow: auto;
-  background: var(--bg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 32px 24px;
-  gap: 0;
+  flex: 1; overflow: auto; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 28px 20px;
 }
-
-/* Page shadow effect */
-#page-wrapper {
-  position: relative;
-}
-
+#page-wrapper { position: relative; }
 #page-wrapper::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(135deg, #555 0%, #333 100%);
-  border-radius: 2px;
-  transform: translate(4px, 4px);
-  z-index: 0;
+  content: ''; position: absolute; inset: -1px;
+  background: #2a2a2a; border-radius: 2px;
+  transform: translate(5px, 5px); z-index: 0;
 }
 
-/* ===== DOCUMENT / PAPER ===== */
+/* ===================== DOCUMENT ===================== */
 #document {
-  position: relative;
-  z-index: 1;
-  width: 794px; /* A4 at 96dpi */
-  min-height: 1123px;
-  background: var(--paper);
-  color: var(--ink);
+  position: relative; z-index: 1;
+  width: 794px; min-height: 1123px;
+  background: var(--paper); color: var(--ink);
   padding: 72px 80px 90px 80px;
   font-family: 'Courier Prime', 'Courier New', monospace;
-  font-size: 13.5px;
-  line-height: 1.7;
+  font-size: 13.5px; line-height: 1.7;
   outline: none;
-  cursor: text;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
+  box-shadow: 0 0 0 1px rgba(0,0,0,.4);
 }
 
-/* ===== DOCUMENT ELEMENTS ===== */
-.doc-header-institution {
-  font-family: 'Courier Prime', monospace;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-align: left;
-  line-height: 1.4;
-  margin-bottom: 4px;
-}
-
-.doc-title {
-  font-family: 'Courier Prime', monospace;
-  font-size: 13.5px;
-  font-weight: 700;
-  text-align: center;
-  text-decoration: underline;
-  letter-spacing: 0.05em;
-  margin: 16px 0;
-}
-
-.doc-field-row {
-  display: flex;
-  align-items: baseline;
-  gap: 0;
-  margin: 3px 0;
-  font-size: 13px;
-}
-
-.doc-field-label {
-  white-space: nowrap;
-  font-weight: 700;
-  font-size: 13px;
-}
-
-.doc-field-dots {
-  flex: 1;
-  border-bottom: 1px solid var(--ink);
-  min-width: 40px;
-  margin: 0 4px;
-  height: 18px;
-  outline: none;
-}
-
-.doc-dots-only {
-  display: block;
-  border-bottom: 1px solid var(--ink);
-  width: 100%;
-  height: 22px;
-  margin: 6px 0;
-  outline: none;
-}
-
+/* Document element styles */
+.doc-inst { font-family: inherit; font-size: 12px; font-weight: 700; letter-spacing: .07em; line-height: 1.4; margin-bottom: 4px; }
+.doc-title { font-family: inherit; font-size: 13.5px; font-weight: 700; text-align: center; text-decoration: underline; letter-spacing: .05em; margin: 14px 0; }
+.doc-para { margin: 5px 0; text-align: justify; font-size: inherit; line-height: 1.7; }
+.doc-meta { font-size: 12.5px; margin: 2px 0; }
+.doc-section { font-weight: 700; font-size: 13px; letter-spacing: .05em; margin: 12px 0 4px 0; }
+.doc-indent { margin: 6px 28px; }
+.doc-field-row { display: flex; align-items: baseline; gap: 2px; margin: 3px 0; font-size: 13px; }
+.doc-field-label { white-space: nowrap; font-weight: 700; font-size: 13px; }
+.doc-field-line { flex: 1; border-bottom: 1px solid var(--ink); min-width: 40px; margin: 0 4px; height: 18px; outline: none; }
+.doc-line-only { display: block; border-bottom: 1px solid var(--ink); width: 100%; height: 22px; margin: 5px 0; outline: none; }
+.doc-hr { border: none; border-top: 1px solid var(--ink); margin: 8px 0; }
 .doc-spacer-sm { height: 14px; display: block; }
-.doc-spacer-md { height: 28px; display: block; }
-.doc-spacer-lg { height: 56px; display: block; }
+.doc-spacer-md { height: 30px; display: block; }
+.doc-spacer-lg { height: 60px; display: block; }
+.doc-numlist { padding-left: 22px; margin: 5px 0; }
+.doc-numlist li { margin: 3px 0; padding-left: 3px; }
+.doc-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 12.5px; }
+.doc-table td, .doc-table th { border: 1px solid var(--ink); padding: 4px 8px; vertical-align: top; text-align: left; }
+.doc-table th { font-weight: 700; background: rgba(0,0,0,.05); }
+.doc-sig-block { display: inline-block; min-width: 180px; text-align: center; margin-top: 6px; }
+.doc-sig-line { border-bottom: 1px solid var(--ink); width: 100%; height: 42px; display: block; margin-bottom: 2px; }
+.doc-sig-label { font-size: 11.5px; text-align: center; display: block; }
+.doc-stamp-wrap { display: block; text-align: right; margin-bottom: 4px; }
+.doc-stamp-txt {
+  display: inline-block; border: 3px solid; padding: 3px 10px;
+  font-weight: 900; font-size: 20px; letter-spacing: .1em;
+  font-family: 'Courier Prime', monospace; line-height: 1;
+  opacity: .88; user-select: none;
+}
+.doc-stamp-txt.red { color: var(--stamp-red); border-color: var(--stamp-red); }
+.doc-stamp-txt.blue { color: var(--stamp-blue); border-color: var(--stamp-blue); }
+.doc-stamp-img { display: inline-block; opacity: .85; user-select: none; }
+.doc-stamp-img img { max-width: 140px; max-height: 80px; display: block; }
 
-.doc-hr {
-  border: none;
-  border-top: 1px solid var(--ink);
-  margin: 10px 0;
-}
+/* Editable hover */
+[contenteditable]:hover:not(#document) { outline: 1px dashed rgba(80,100,200,.35); border-radius: 2px; }
+[contenteditable]:focus:not(#document) { outline: 1px solid rgba(80,100,200,.55); border-radius: 2px; }
+#document *::selection { background: rgba(120,160,255,.3); }
 
-.doc-section-header {
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.05em;
-  margin: 12px 0 4px 0;
-}
+/* Drop zone highlight */
+#document.drag-over { background: #f0ecd8; }
 
-.doc-indent-block {
-  margin-left: 28px;
-  margin-right: 28px;
-  margin-top: 6px;
-  margin-bottom: 6px;
+/* ===================== TABLE MODAL ===================== */
+#tbl-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.7); z-index: 500;
+  align-items: center; justify-content: center;
 }
+#tbl-modal.open { display: flex; }
+#tbl-box {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 10px; padding: 24px; width: 320px;
+}
+#tbl-box h3 { font-size: 15px; margin-bottom: 16px; }
+.tbl-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.tbl-row label { width: 80px; font-size: 13px; color: var(--text-dim); }
+.tbl-row input[type=number] {
+  flex: 1; background: var(--panel2); border: 1px solid var(--border);
+  color: var(--text); padding: 6px 10px; border-radius: var(--radius);
+  font-size: 14px; font-family: var(--ui);
+}
+.tbl-row input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; }
+.tbl-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
 
-.doc-signature-block {
-  display: inline-block;
-  min-width: 180px;
-  text-align: center;
-  margin-top: 8px;
+/* ===================== CONFIRM MODAL ===================== */
+#confirm-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.7); z-index: 600;
+  align-items: center; justify-content: center;
 }
-.doc-signature-line {
-  border-bottom: 1px solid var(--ink);
-  width: 100%;
-  height: 40px;
-  display: block;
-  margin-bottom: 2px;
+#confirm-modal.open { display: flex; }
+#confirm-box {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 10px; padding: 24px; width: 340px;
 }
-.doc-signature-label {
-  font-size: 11.5px;
-  text-align: center;
-  display: block;
-}
+#confirm-box h3 { font-size: 15px; margin-bottom: 8px; }
+#confirm-box p { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; line-height: 1.5; }
+.confirm-btns { display: flex; gap: 10px; justify-content: flex-end; }
 
-/* STAMPS */
-.doc-stamp {
-  display: inline-block;
-  border: 3px solid;
-  padding: 4px 12px;
-  font-weight: 900;
-  font-size: 22px;
-  letter-spacing: 0.12em;
-  transform: rotate(-8deg);
-  opacity: 0.85;
-  font-family: 'Courier Prime', monospace;
-  line-height: 1;
-  user-select: none;
-  cursor: default;
-  position: relative;
-}
-.doc-stamp.red { color: var(--stamp-red); border-color: var(--stamp-red); }
-.doc-stamp.blue { color: var(--stamp-blue); border-color: var(--stamp-blue); }
-.doc-stamp-wrap {
-  display: block;
-  text-align: right;
-  margin-bottom: 6px;
-}
-
-/* Numbered list */
-.doc-numlist {
-  padding-left: 20px;
-  margin: 6px 0;
-}
-.doc-numlist li {
-  margin: 3px 0;
-  font-size: 13px;
-  padding-left: 4px;
-}
-
-/* Table */
-.doc-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 8px 0;
-  font-size: 12.5px;
-}
-.doc-table td, .doc-table th {
-  border: 1px solid var(--ink);
-  padding: 4px 8px;
-  text-align: left;
-  vertical-align: top;
-}
-.doc-table th {
-  font-weight: 700;
-  background: rgba(0,0,0,0.04);
-}
-
-/* Paragraph */
-.doc-para {
-  margin: 6px 0;
-  text-align: justify;
-  font-size: 13.5px;
-  line-height: 1.7;
-}
-
-/* Sygnatura / metadata */
-.doc-meta {
-  font-size: 12px;
-  margin: 2px 0;
-}
-
-/* Selection highlight on paper */
-#document *::selection { background: rgba(150, 180, 255, 0.35); }
-
-/* Editable elements get subtle hover */
-[contenteditable="true"]:hover {
-  outline: 1px dashed rgba(100, 120, 200, 0.3);
-  border-radius: 2px;
-}
-[contenteditable="true"]:focus {
-  outline: 1px solid rgba(100, 120, 200, 0.5);
-  border-radius: 2px;
-}
-
-/* ===== FONT OPTIONS ===== */
-.font-courier { font-family: 'Courier Prime', 'Courier New', monospace; }
-.font-elite { font-family: 'Special Elite', cursive; }
-.font-fell { font-family: 'IM Fell English', serif; }
-
-/* ===== STATUS BAR ===== */
+/* ===================== STATUS ===================== */
 #statusbar {
-  height: 26px;
-  background: var(--panel);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 20px;
-  font-size: 11px;
-  color: var(--text-dimmer);
-  flex-shrink: 0;
+  height: 24px; background: var(--panel); border-top: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 14px; gap: 18px;
+  font-size: 11px; color: var(--text-dimmer); flex-shrink: 0;
 }
-
-#statusbar span b { color: var(--text-dim); }
-
-/* ===== MODAL ===== */
-#modal-overlay {
-  display: none;
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
+#statusbar b { color: var(--text-dim); }
+#drag-hint {
+  margin-left: auto; font-size: 11px; color: var(--text-dimmer);
+  transition: color .2s;
 }
-#modal-overlay.open { display: flex; }
-#modal {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 24px;
-  width: 380px;
-  max-width: 90vw;
-}
-#modal h3 { font-size: 15px; margin-bottom: 8px; }
-#modal p { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; line-height: 1.5; }
-#modal .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+#drag-hint.active { color: #7788ff; }
 
-/* ===== SCROLLBAR ===== */
-::-webkit-scrollbar { width: 8px; height: 8px; }
+/* Scrollbar */
+::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: #3a3a4a; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #4a4a5a; }
+::-webkit-scrollbar-thumb { background: #333344; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #44445a; }
 
-/* ===== TOOLTIP ===== */
-[data-tip] { position: relative; }
-[data-tip]::after {
-  content: attr(data-tip);
-  position: absolute;
-  left: 100%; top: 50%; transform: translateY(-50%);
-  margin-left: 8px;
-  background: #111;
-  color: #eee;
-  font-size: 11px;
-  padding: 3px 7px;
-  border-radius: 4px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
-  z-index: 200;
-  border: 1px solid var(--border);
-}
-[data-tip]:hover::after { opacity: 1; }
-
-/* Print styles */
+/* Print */
 @media print {
-  body { background: white; overflow: visible; }
-  #topbar, #sidebar, #statusbar { display: none; }
-  #canvas-area { padding: 0; background: white; display: block; overflow: visible; }
-  #page-wrapper { box-shadow: none; }
+  body { background: #fff; overflow: visible; }
+  #topbar, #fmt-bar, #sidebar, #statusbar { display: none; }
+  #canvas-area { padding: 0; background: #fff; display: block; overflow: visible; }
   #page-wrapper::before { display: none; }
-  #document {
-    width: 100%; min-height: auto;
-    box-shadow: none;
-    padding: 20mm 22mm 25mm 22mm;
-  }
+  #document { width: 100%; min-height: auto; box-shadow: none; padding: 15mm 20mm 20mm 20mm; }
   [contenteditable]:hover, [contenteditable]:focus { outline: none !important; }
 }
-
-/* Highlight removable elements */
-.doc-removable {
-  position: relative;
-  cursor: pointer;
-}
-.doc-removable:hover::after {
-  content: '×';
-  position: absolute;
-  top: -6px; right: -6px;
-  width: 16px; height: 16px;
-  background: var(--accent);
-  color: white;
-  font-size: 11px;
-  font-weight: 700;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  text-align: center;
-}
-
 </style>
 </head>
 <body>
 
 <!-- TOPBAR -->
 <div id="topbar">
-  <h1>📄 Dokumenty Larpowe</h1>
-  <div class="top-sep"></div>
-
-  <select id="font-select" title="Czcionka dokumentu" onchange="changeFont(this.value)">
-    <option value="font-courier">Courier Prime (maszynopis)</option>
-    <option value="font-elite">Special Elite (stara maszyna)</option>
-    <option value="font-fell">IM Fell English (klasyk)</option>
-  </select>
-
-  <div class="top-sep"></div>
-
-  <button class="top-btn" onclick="showModal('clear')" title="Wyczyść cały dokument">
+  <span id="topbar-title">📄 Dokumenty Larpowe</span>
+  <div class="tsep"></div>
+  <button class="tbtn" onclick="confirmClear()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
-    Nowy dokument
+    Nowy
   </button>
-
   <div style="flex:1"></div>
-
-  <button class="top-btn" onclick="exportPNG()" title="Eksportuj jako PNG">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9l4-4 4 4 5-5 5 5"/><circle cx="8.5" cy="13.5" r="1.5"/></svg>
+  <button class="tbtn" onclick="exportPNG()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9l4-4 4 4 5-5 5 5"/></svg>
     PNG
   </button>
-
-  <button class="top-btn primary" onclick="exportPDF()" title="Eksportuj jako PDF">
+  <button class="tbtn primary" onclick="exportPDF()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
     PDF
   </button>
 </div>
 
-<!-- MAIN APP -->
+<!-- FORMAT TOOLBAR -->
+<div id="fmt-bar">
+  <!-- Font name -->
+  <select id="fmt-fontname" onchange="fmtFont(this.value)" title="Czcionka dokumentu">
+    <option value="'Courier Prime', 'Courier New', monospace">Courier Prime (maszynopis)</option>
+    <option value="'Special Elite', cursive">Special Elite (stara maszyna)</option>
+    <option value="'IM Fell English', serif">IM Fell English (klasyk)</option>
+    <option value="'UnifrakturMaguntia', cursive">Unifraktur (gotyk)</option>
+    <!-- Deweloper: dodaj tutaj własne czcionki np:
+    <option value="'MojaFontCzcionka', serif">Moja Czcionka</option>
+    -->
+  </select>
+
+  <!-- Font size -->
+  <select id="fmt-fontsize" onchange="fmtSize(this.value)" title="Rozmiar czcionki">
+    <option value="10px">10</option>
+    <option value="11px">11</option>
+    <option value="12px">12</option>
+    <option value="13px" selected>13</option>
+    <option value="14px">14</option>
+    <option value="15px">15</option>
+    <option value="16px">16</option>
+    <option value="18px">18</option>
+    <option value="20px">20</option>
+    <option value="24px">24</option>
+    <option value="28px">28</option>
+    <option value="32px">32</option>
+  </select>
+
+  <div class="fbtn-sep"></div>
+
+  <!-- Bold / Italic / Underline -->
+  <button class="fbtn" id="btn-bold" onclick="fmtExec('bold')" title="Pogrubienie (Ctrl+B)"><b>B</b></button>
+  <button class="fbtn" id="btn-italic" onclick="fmtExec('italic')" title="Kursywa (Ctrl+I)"><i>I</i></button>
+  <button class="fbtn" id="btn-underline" onclick="fmtExec('underline')" title="Podkreślenie (Ctrl+U)"><u>U</u></button>
+  <button class="fbtn" id="btn-strike" onclick="fmtExec('strikeThrough')" title="Przekreślenie"><s>S</s></button>
+
+  <div class="fbtn-sep"></div>
+
+  <!-- Alignment -->
+  <button class="fbtn" onclick="fmtExec('justifyLeft')" title="Wyrównaj do lewej">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect y="3" width="20" height="2"/><rect y="8" width="14" height="2"/><rect y="13" width="20" height="2"/><rect y="18" width="14" height="2"/></svg>
+  </button>
+  <button class="fbtn" onclick="fmtExec('justifyCenter')" title="Wyśrodkuj">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="3" width="20" height="2"/><rect x="5" y="8" width="14" height="2"/><rect x="2" y="13" width="20" height="2"/><rect x="5" y="18" width="14" height="2"/></svg>
+  </button>
+  <button class="fbtn" onclick="fmtExec('justifyRight')" title="Wyrównaj do prawej">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="3" width="20" height="2"/><rect x="10" y="8" width="14" height="2"/><rect x="4" y="13" width="20" height="2"/><rect x="10" y="18" width="14" height="2"/></svg>
+  </button>
+  <button class="fbtn" onclick="fmtExec('justifyFull')" title="Wyrównaj do obu stron">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="3" width="20" height="2"/><rect x="2" y="8" width="20" height="2"/><rect x="2" y="13" width="20" height="2"/><rect x="2" y="18" width="14" height="2"/></svg>
+  </button>
+
+  <div class="fbtn-sep"></div>
+
+  <!-- Color -->
+  <input type="color" id="fmt-color" value="#111111" onchange="fmtColor(this.value)" title="Kolor tekstu">
+
+  <div class="fbtn-sep"></div>
+
+  <!-- Clear formatting -->
+  <button class="fbtn" onclick="fmtExec('removeFormat')" title="Usuń formatowanie">✕</button>
+</div>
+
+<!-- MAIN -->
 <div id="app">
 
   <!-- SIDEBAR -->
   <div id="sidebar">
 
     <!-- TEMPLATES -->
-    <div class="sidebar-section">
-      <div class="sidebar-title">Szablony</div>
-      <div class="template-grid">
-        <button class="template-btn active" onclick="loadTemplate('blank')" title="Pusty dokument">
-          <div class="tpl-icon">
-            <div class="tpl-line short"></div>
-          </div>
-          <div class="tpl-info">
-            <span class="tpl-name">Pusty</span>
-            <span class="tpl-desc">Od zera</span>
-          </div>
-        </button>
-        <button class="template-btn" onclick="loadTemplate('pismo')" title="Pismo urzędowe">
-          <div class="tpl-icon">
-            <div class="tpl-line thick short"></div>
-            <div class="tpl-line"></div>
-            <div class="tpl-line short"></div>
-            <div class="tpl-line gap"></div>
-            <div class="tpl-line"></div>
-            <div class="tpl-line"></div>
-          </div>
-          <div class="tpl-info">
-            <span class="tpl-name">Pismo</span>
-            <span class="tpl-desc">Oficjalny list</span>
-          </div>
-        </button>
-        <button class="template-btn" onclick="loadTemplate('raport')" title="Raport / decyzja">
-          <div class="tpl-icon">
-            <div class="tpl-line thick"></div>
-            <div class="tpl-line short"></div>
-            <div class="tpl-line short"></div>
-            <div class="tpl-line gap"></div>
-            <div class="tpl-line"></div>
-            <div class="tpl-line"></div>
-            <div class="tpl-line short"></div>
-          </div>
-          <div class="tpl-info">
-            <span class="tpl-name">Raport</span>
-            <span class="tpl-desc">Decyzja / protokół</span>
-          </div>
-        </button>
-        <button class="template-btn" onclick="loadTemplate('karta')" title="Karta osobowa">
-          <div class="tpl-icon">
-            <div class="tpl-line thick"></div>
-            <div class="tpl-line gap"></div>
-            <div class="tpl-line short"></div>
-            <div class="tpl-line short"></div>
-            <div class="tpl-line short"></div>
-            <div class="tpl-line gap"></div>
-            <div class="tpl-line short"></div>
-          </div>
-          <div class="tpl-info">
-            <span class="tpl-name">Karta osoby</span>
-            <span class="tpl-desc">Dane personalne</span>
-          </div>
-        </button>
-        <button class="template-btn" onclick="loadTemplate('wniosek')" title="Wniosek formalny">
-          <div class="tpl-icon">
-            <div class="tpl-line thick"></div>
-            <div class="tpl-line short"></div>
-            <div class="tpl-line gap"></div>
-            <div class="tpl-line"></div>
-            <div class="tpl-line"></div>
-            <div class="tpl-line gap"></div>
-            <div class="tpl-line short"></div>
-          </div>
-          <div class="tpl-info">
-            <span class="tpl-name">Wniosek</span>
-            <span class="tpl-desc">Podanie / prośba</span>
-          </div>
-        </button>
-      </div>
-    </div>
-
-    <!-- NARZĘDZIA WSTAWIANIA -->
-    <div class="sidebar-section">
-      <div class="sidebar-title">Wstaw element</div>
-      <div class="tool-grid">
-
-        <button class="tool-btn" onclick="insertElement('para')" data-tip="Akapit tekstu">
-          <span class="tool-icon">¶</span> Akapit tekstu
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('title')" data-tip="Tytuł dokumentu">
-          <span class="tool-icon">T</span> Tytuł / nagłówek
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('header-inst')" data-tip="Nagłówek instytucji">
-          <span class="tool-icon">🏛</span> Nagłówek instytucji
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('section')" data-tip="Nagłówek sekcji">
-          <span class="tool-icon">§</span> Nagłówek sekcji
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('meta-row')" data-tip="Wiersz metadanych">
-          <span class="tool-icon">≡</span> Wiersz (np. DATA:)
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('field')" data-tip="Pole z etykietą i linią">
-          <span class="tool-icon">_</span> Pole do wypełnienia
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('dots-only')" data-tip="Sama linia do podpisu/wpisu">
-          <span class="tool-icon">⋯</span> Linia pusta
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('indent')" data-tip="Wcięty blok tekstu">
-          <span class="tool-icon">❝</span> Blok z wcięciem
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('numlist')" data-tip="Lista numerowana">
-          <span class="tool-icon">1.</span> Lista numerowana
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('table2')" data-tip="Tabela 2-kolumnowa">
-          <span class="tool-icon">⊞</span> Tabela 2-kolumny
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('table3')" data-tip="Tabela 3-kolumnowa">
-          <span class="tool-icon">⊟</span> Tabela 3-kolumny
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('hr')" data-tip="Linia pozioma">
-          <span class="tool-icon">—</span> Linia pozioma
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('spacer-sm')" data-tip="Mały odstęp">
-          <span class="tool-icon">↕</span> Odstęp mały
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('spacer-md')" data-tip="Średni odstęp">
-          <span class="tool-icon">↕</span> Odstęp średni
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('spacer-lg')" data-tip="Duży odstęp (miejsce na podpis)">
-          <span class="tool-icon">↕</span> Odstęp duży
-        </button>
-
-        <button class="tool-btn" onclick="insertElement('signature')" data-tip="Blok podpisu z linią">
-          <span class="tool-icon">✍</span> Blok podpisu
-        </button>
-
-      </div>
-    </div>
-
-    <!-- STEMPLE -->
-    <div class="sidebar-section">
-      <div class="sidebar-title">Stempel</div>
-      <div class="stamp-row">
-        <button class="stamp-opt red" onclick="insertStamp('TAJNE', 'red')">TAJNE</button>
-        <button class="stamp-opt blue" onclick="insertStamp('KOPIA', 'blue')">KOPIA</button>
-      </div>
-      <div class="stamp-row" style="margin-top:6px">
-        <button class="stamp-opt red" onclick="insertStamp('POUFNE', 'red')">POUFNE</button>
-        <button class="stamp-opt blue" onclick="insertStamp('ORYGINAŁ', 'blue')">ORYG.</button>
-      </div>
-      <div class="stamp-row" style="margin-top:6px">
-        <button class="stamp-opt red" onclick="insertStamp('ANULOWANE', 'red')" style="font-size:9px">ANULOWANE</button>
-        <button class="stamp-opt blue" onclick="insertStamp('ZATWIER.', 'blue')" style="font-size:9px">ZATW.</button>
-      </div>
-      <button class="tool-btn" style="margin-top:6px; font-size:11px" onclick="promptCustomStamp()">
-        <span class="tool-icon">✎</span> Własny stempel...
+    <div class="ss">
+      <div class="ss-title">Szablony</div>
+      <button class="tpl-btn active" onclick="loadTpl('blank',this)">
+        <div class="tpl-thumb"><div class="tl w60"></div></div>
+        <div class="tpl-info"><span class="tpl-name">Pusty</span><span class="tpl-desc">Od zera</span></div>
       </button>
+      <button class="tpl-btn" onclick="loadTpl('pismo',this)">
+        <div class="tpl-thumb"><div class="tl h3 w60"></div><div class="tl"></div><div class="tl w60"></div><div class="tl mt"></div><div class="tl"></div></div>
+        <div class="tpl-info"><span class="tpl-name">Pismo</span><span class="tpl-desc">List urzędowy</span></div>
+      </button>
+      <button class="tpl-btn" onclick="loadTpl('raport',this)">
+        <div class="tpl-thumb"><div class="tl h3"></div><div class="tl w60"></div><div class="tl mt"></div><div class="tl"></div><div class="tl"></div></div>
+        <div class="tpl-info"><span class="tpl-name">Raport</span><span class="tpl-desc">Decyzja / protokół</span></div>
+      </button>
+      <button class="tpl-btn" onclick="loadTpl('karta',this)">
+        <div class="tpl-thumb"><div class="tl h3 w60"></div><div class="tl mt"></div><div class="tl w60"></div><div class="tl w60"></div><div class="tl mt"></div><div class="tl w60"></div></div>
+        <div class="tpl-info"><span class="tpl-name">Karta osoby</span><span class="tpl-desc">Dane personalne</span></div>
+      </button>
+      <button class="tpl-btn" onclick="loadTpl('wniosek',this)">
+        <div class="tpl-thumb"><div class="tl h3"></div><div class="tl w60"></div><div class="tl mt"></div><div class="tl"></div><div class="tl"></div><div class="tl w60"></div></div>
+        <div class="tpl-info"><span class="tpl-name">Wniosek</span><span class="tpl-desc">Podanie / prośba</span></div>
+      </button>
+    </div>
+
+    <!-- ELEMENTS — DRAGGABLE -->
+    <div class="ss">
+      <div class="ss-title">Elementy — przeciągnij</div>
+      <div id="tool-list">
+        <!-- generated by JS -->
+      </div>
+    </div>
+
+    <!-- STAMPS — DRAGGABLE -->
+    <div class="ss">
+      <div class="ss-title">Stemple — przeciągnij</div>
+      <div id="stamp-list">
+        <!-- generated by JS -->
+      </div>
+      <button class="add-stamp-btn" onclick="addCustomStamp()">+ Własny stempel tekstowy</button>
     </div>
 
   </div>
 
-  <!-- CANVAS / DOCUMENT AREA -->
+  <!-- CANVAS -->
   <div id="canvas-area">
     <div id="page-wrapper">
-      <div id="document" contenteditable="true" spellcheck="false" class="font-courier"
-           onkeyup="updateStatus()" onclick="updateStatus()">
-        <!-- content injected by JS -->
+      <div id="document" contenteditable="true" spellcheck="false"
+           ondragover="onDocDragOver(event)"
+           ondragleave="onDocDragLeave(event)"
+           ondrop="onDocDrop(event)"
+           onkeyup="updateStatus()"
+           onclick="updateStatus()"
+           onmouseup="updateFmtState()">
       </div>
     </div>
   </div>
@@ -784,314 +481,571 @@ body {
 <div id="statusbar">
   <span>Znaki: <b id="stat-chars">0</b></span>
   <span>Słowa: <b id="stat-words">0</b></span>
-  <span style="margin-left:auto; color: var(--text-dimmer)">Kliknij na dokument aby edytować • Ctrl+Z cofnie zmiany</span>
+  <span id="drag-hint">← Przeciągnij elementy z panelu na dokument</span>
 </div>
 
-<!-- MODAL -->
-<div id="modal-overlay">
-  <div id="modal">
-    <h3 id="modal-title">Nowy dokument</h3>
-    <p id="modal-body">Czy na pewno chcesz wyczyścić cały dokument? Tej operacji nie można cofnąć.</p>
-    <div class="modal-btns">
-      <button class="top-btn" onclick="closeModal()">Anuluj</button>
-      <button class="top-btn danger" id="modal-confirm-btn" onclick="">Wyczyść</button>
+<!-- TABLE MODAL -->
+<div id="tbl-modal">
+  <div id="tbl-box">
+    <h3>Wstaw tabelę</h3>
+    <div class="tbl-row">
+      <label>Kolumny:</label>
+      <input type="number" id="tbl-cols" value="3" min="1" max="10">
+    </div>
+    <div class="tbl-row">
+      <label>Wiersze:</label>
+      <input type="number" id="tbl-rows" value="3" min="1" max="20">
+    </div>
+    <div class="tbl-row">
+      <label>Nagłówek:</label>
+      <input type="checkbox" id="tbl-header" checked>
+      <span style="font-size:12px;color:var(--text-dim)">pierwszy wiersz pogrubiony</span>
+    </div>
+    <div class="tbl-btns">
+      <button class="tbtn" onclick="closeTblModal()">Anuluj</button>
+      <button class="tbtn primary" onclick="confirmTable()">Wstaw</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirm-modal">
+  <div id="confirm-box">
+    <h3 id="cm-title">Nowy dokument</h3>
+    <p id="cm-body">Czy na pewno chcesz wyczyścić dokument?</p>
+    <div class="confirm-btns">
+      <button class="tbtn" onclick="closeConfirm()">Anuluj</button>
+      <button class="tbtn" style="border-color:#8b1a1a;color:#e88" id="cm-ok" onclick="">OK</button>
     </div>
   </div>
 </div>
 
 <script>
-// ===== TEMPLATES =====
+// =====================================================================
+// KONFIGURACJA DEWELOPERA
+// =====================================================================
+
+// Własne czcionki lokalnie: dodaj @font-face w <style> i opcję w #fmt-fontname
+// Lokalny odpowiednik @import — zadziała po wrzuceniu pliku obok index.html
+
+// STEMPLE OBRAZKOWE z folderu /assets/
+// Wrzuć np. tajne.png, kopia.png do folderu assets/
+// i dodaj tutaj nazwę bez rozszerzenia:
+const ASSET_STAMPS = [
+  // 'tajne',
+  // 'kopia',
+  // 'poufne',
+];
+
+// =====================================================================
+// UNDO STACK
+// =====================================================================
+const MAX_UNDO = 80;
+let undoStack = [];
+let redoStack = [];
+let undoLock = false;
+
+function saveUndo() {
+  if (undoLock) return;
+  const doc = document.getElementById('document');
+  const snap = doc.innerHTML;
+  if (undoStack.length && undoStack[undoStack.length-1] === snap) return;
+  undoStack.push(snap);
+  if (undoStack.length > MAX_UNDO) undoStack.shift();
+  redoStack = [];
+}
+
+function doUndo() {
+  if (undoStack.length < 2) return;
+  const doc = document.getElementById('document');
+  redoStack.push(undoStack.pop());
+  const prev = undoStack[undoStack.length-1];
+  undoLock = true;
+  doc.innerHTML = prev;
+  undoLock = false;
+  updateStatus();
+}
+
+function doRedo() {
+  if (!redoStack.length) return;
+  const doc = document.getElementById('document');
+  const next = redoStack.pop();
+  undoStack.push(next);
+  undoLock = true;
+  doc.innerHTML = next;
+  undoLock = false;
+  updateStatus();
+}
+
+// =====================================================================
+// TEMPLATES
+// =====================================================================
 const TEMPLATES = {
+blank: `<p class="doc-para" contenteditable="true"><br></p>`,
 
-  blank: `<p class="doc-para" contenteditable="true"><br></p>`,
-
-  pismo: `
-<div class="doc-header-institution" contenteditable="true">MINISTERSTWO MAGII<br>DEPARTAMENT TAJEMNIC</div>
-<div class="doc-stamp-wrap"><span class="doc-stamp red" contenteditable="false">TAJNE</span></div>
+pismo: `
+<div class="doc-inst" contenteditable="true">MINISTERSTWO MAGII<br>DEPARTAMENT TAJEMNIC</div>
+<div style="text-align:right"><span class="doc-stamp-txt red" contenteditable="false" style="transform:rotate(-7deg);display:inline-block">TAJNE</span></div>
 <div class="doc-meta" contenteditable="true">Warszawa, dnia ............... r.</div>
 <div class="doc-spacer-sm"></div>
-<div contenteditable="true">Do rąk własnych:<br><b>.....................................</b><br>.....................................</div>
+<div contenteditable="true">Do rąk własnych:<br><strong>.....................................</strong><br>.....................................</div>
 <div class="doc-spacer-sm"></div>
-<div class="doc-meta" contenteditable="true">Dotyczy: ................................................................</div>
+<div class="doc-meta" contenteditable="true"><strong>Dotyczy:</strong> ................................................................</div>
 <hr class="doc-hr">
 <div class="doc-spacer-sm"></div>
 <div class="doc-title" contenteditable="true">TYTUŁ PISMA</div>
 <div class="doc-spacer-sm"></div>
 <p class="doc-para" contenteditable="true">Szanowny Panie / Szanowna Pani,</p>
-<p class="doc-para" contenteditable="true">Treść pisma. Kliknij tutaj aby edytować ten akapit. Możesz pisać swobodnie, tekst automatycznie się dostosuje.</p>
-<p class="doc-para" contenteditable="true">Kolejny akapit pisma. Dodaj więcej akapitów używając narzędzi po lewej stronie.</p>
+<p class="doc-para" contenteditable="true">Treść pisma. Kliknij tutaj aby edytować ten akapit. Możesz pisać swobodnie, tekst automatycznie się dostosuje do szerokości strony.</p>
+<p class="doc-para" contenteditable="true">Kolejny akapit pisma. Dodaj więcej elementów przeciągając je z panelu po lewej stronie.</p>
 <div class="doc-spacer-md"></div>
-<div style="text-align:right">
-  <div class="doc-signature-block" contenteditable="false">
-    <span class="doc-signature-line"></span>
-    <span class="doc-signature-label" contenteditable="true">Imię Nazwisko<br>Stanowisko</span>
-  </div>
-</div>`,
+<div style="text-align:right"><div class="doc-sig-block" contenteditable="false">
+  <span class="doc-sig-line"></span>
+  <span class="doc-sig-label" contenteditable="true">Imię Nazwisko<br>Stanowisko</span>
+</div></div>`,
 
-  raport: `
-<div class="doc-header-institution" contenteditable="true">MINISTERSTWO MAGII<br>DEPARTAMENT TAJEMNIC</div>
+raport: `
+<div class="doc-inst" contenteditable="true">MINISTERSTWO MAGII<br>DEPARTAMENT TAJEMNIC</div>
 <div class="doc-spacer-sm"></div>
 <div class="doc-title" contenteditable="true">DECYZJA NR .../...-DT</div>
 <div class="doc-spacer-sm"></div>
-<div class="doc-meta" contenteditable="true"><b>DATA:</b> ............... r.</div>
-<div class="doc-meta" contenteditable="true"><b>SYGNATURA SPRAWY:</b> .................................</div>
-<div class="doc-meta" contenteditable="true"><b>WNIOSKODAWCA:</b> .................................</div>
+<div class="doc-meta" contenteditable="true"><strong>DATA:</strong> ............... r.</div>
+<div class="doc-meta" contenteditable="true"><strong>SYGNATURA SPRAWY:</strong> .................................</div>
+<div class="doc-meta" contenteditable="true"><strong>WNIOSKODAWCA:</strong> .................................</div>
 <hr class="doc-hr">
-<p class="doc-para" contenteditable="true">Po rozpatrzeniu wniosku z dnia ............... dotyczącego ................................................., niniejszym:</p>
+<p class="doc-para" contenteditable="true">Po rozpatrzeniu wniosku z dnia ............... dotyczącego ......................................................................, niniejszym:</p>
 <div class="doc-spacer-sm"></div>
-<div class="doc-title" contenteditable="true">ZATWIERDZA / ODMAWIA</div>
+<div class="doc-title" contenteditable="true">ZATWIERDZA REALIZACJĘ PROJEKTU</div>
 <div class="doc-spacer-sm"></div>
-<div class="doc-section-header" contenteditable="true">I. UZASADNIENIE</div>
+<div class="doc-section" contenteditable="true">I. UZASADNIENIE</div>
 <p class="doc-para" contenteditable="true">Treść uzasadnienia decyzji.</p>
-<div class="doc-section-header" contenteditable="true">II. UWAGI KOŃCOWE</div>
-<div class="doc-indent-block">
+<div class="doc-section" contenteditable="true">II. UWAGI KOŃCOWE</div>
+<div class="doc-indent">
 <p class="doc-para" contenteditable="true">• Wszystkie materiały objęte są klauzulą tajności.</p>
 <p class="doc-para" contenteditable="true">• Kolejna uwaga do wpisania.</p>
 </div>
 <div class="doc-spacer-lg"></div>
-<div style="text-align:right">
-  <div class="doc-signature-block" contenteditable="false">
-    <span class="doc-signature-line"></span>
-    <span class="doc-signature-label" contenteditable="true">Imię Nazwisko<br>DYREKTOR DEPARTAMENTU</span>
-  </div>
-</div>`,
+<div style="text-align:right"><div class="doc-sig-block" contenteditable="false">
+  <span class="doc-sig-line"></span>
+  <span class="doc-sig-label" contenteditable="true">Imię Nazwisko<br>DYREKTOR DEPARTAMENTU TAJEMNIC</span>
+</div></div>`,
 
-  karta: `
-<div class="doc-stamp-wrap"><span class="doc-stamp red" contenteditable="false">POUFNE</span></div>
+karta: `
+<div style="text-align:right"><span class="doc-stamp-txt red" contenteditable="false" style="transform:rotate(-8deg);display:inline-block">POUFNE</span></div>
 <div class="doc-title" contenteditable="true">KARTA PRACOWNIKA</div>
 <hr class="doc-hr">
-<div class="doc-section-header" contenteditable="true">DANE PODSTAWOWE</div>
-<div class="doc-field-row">
-  <span class="doc-field-label" contenteditable="true">Nazwisko i imię:</span>
-  <div class="doc-field-dots" contenteditable="true"></div>
-</div>
-<div class="doc-field-row">
-  <span class="doc-field-label" contenteditable="true">Data urodzenia:</span>
-  <div class="doc-field-dots" contenteditable="true"></div>
-  <span class="doc-field-label" contenteditable="true" style="margin-left:12px">Obywatelstwo:</span>
-  <div class="doc-field-dots" contenteditable="true"></div>
-</div>
-<div class="doc-field-row">
-  <span class="doc-field-label" contenteditable="true">Stopień naukowy:</span>
-  <div class="doc-field-dots" contenteditable="true"></div>
-</div>
-<div class="doc-field-row">
-  <span class="doc-field-label" contenteditable="true">Stan cywilny:</span>
-  <div class="doc-field-dots" contenteditable="true"></div>
-</div>
+<div class="doc-section" contenteditable="true">DANE PODSTAWOWE</div>
+<div class="doc-field-row"><span class="doc-field-label" contenteditable="true">Nazwisko i imię:</span><div class="doc-field-line" contenteditable="true"></div></div>
+<div class="doc-field-row"><span class="doc-field-label" contenteditable="true">Data urodzenia:</span><div class="doc-field-line" contenteditable="true"></div><span class="doc-field-label" contenteditable="true" style="margin-left:10px">Obywatelstwo:</span><div class="doc-field-line" contenteditable="true"></div></div>
+<div class="doc-field-row"><span class="doc-field-label" contenteditable="true">Stopień naukowy:</span><div class="doc-field-line" contenteditable="true"></div></div>
+<div class="doc-field-row"><span class="doc-field-label" contenteditable="true">Stan cywilny:</span><div class="doc-field-line" contenteditable="true"></div></div>
 <div class="doc-spacer-sm"></div>
-<div class="doc-section-header" contenteditable="true">WYKSZTAŁCENIE I KARIERA</div>
+<div class="doc-section" contenteditable="true">WYKSZTAŁCENIE I KARIERA</div>
 <p class="doc-para" contenteditable="true">• ............. r. – ...............................................</p>
 <p class="doc-para" contenteditable="true">• ............. r. – ...............................................</p>
 <p class="doc-para" contenteditable="true">• ............. r. – ...............................................</p>
 <div class="doc-spacer-sm"></div>
-<div class="doc-section-header" contenteditable="true">SPECJALIZACJA</div>
+<div class="doc-section" contenteditable="true">SPECJALIZACJA BADAWCZA</div>
 <p class="doc-para" contenteditable="true">• .....................................................................</p>
 <p class="doc-para" contenteditable="true">• .....................................................................</p>
 <div class="doc-spacer-sm"></div>
-<div class="doc-section-header" contenteditable="true">UWAGI SŁUŻBOWE</div>
+<div class="doc-section" contenteditable="true">UWAGI SŁUŻBOWE</div>
 <p class="doc-para" contenteditable="true">Brak kar dyscyplinarnych.</p>
-<p class="doc-para" contenteditable="true">Zakwalifikowany/a do pracy w placówkach o podwyższonym stopniu tajności.</p>
+<p class="doc-para" contenteditable="true">Zakwalifikowany/a do pracy w placówkach o podwyższonym stopniu tajności (klauzula C).</p>
 <div class="doc-spacer-md"></div>
 <div class="doc-meta" contenteditable="true">Data sporządzenia: ...............</div>`,
 
-  wniosek: `
-<div class="doc-header-institution" contenteditable="true">MINISTERSTWO MAGII<br>KOMISJA ETYKI DEPARTAMENTU TAJEMNIC</div>
+wniosek: `
+<div class="doc-inst" contenteditable="true">MINISTERSTWO MAGII<br>KOMISJA ETYKI DEPARTAMENTU TAJEMNIC</div>
 <div class="doc-meta" contenteditable="true">............... r.</div>
 <div class="doc-spacer-sm"></div>
-<div class="doc-title" contenteditable="true">WNIOSEK / PODANIE</div>
-<div class="doc-meta" contenteditable="true"><b>SYGNATURA SPRAWY:</b> .................................</div>
-<div class="doc-meta" contenteditable="true"><b>WNIOSKODAWCA:</b> .................................</div>
+<div class="doc-title" contenteditable="true">WNIOSEK / PODANIE O ZATWIERDZENIE</div>
+<div class="doc-meta" contenteditable="true"><strong>SYGNATURA SPRAWY:</strong> .................................</div>
+<div class="doc-meta" contenteditable="true"><strong>WNIOSKODAWCA:</strong> .................................</div>
 <hr class="doc-hr">
 <div class="doc-spacer-sm"></div>
 <p class="doc-para" contenteditable="true">Zwracam się z prośbą o ................................................ w związku z ................................................</p>
-<div class="doc-section-header" contenteditable="true">I. PODSTAWA WNIOSKU</div>
+<div class="doc-section" contenteditable="true">I. PODSTAWA WNIOSKU</div>
 <p class="doc-para" contenteditable="true">Treść uzasadnienia wniosku.</p>
-<div class="doc-section-header" contenteditable="true">II. ZAKRES WNIOSKU</div>
-<ol class="doc-numlist">
-  <li contenteditable="true">Pierwsza prośba lub punkt wniosku.</li>
-  <li contenteditable="true">Druga prośba lub punkt wniosku.</li>
-  <li contenteditable="true">Trzecia prośba lub punkt wniosku.</li>
+<div class="doc-section" contenteditable="true">II. ZAKRES WNIOSKU</div>
+<ol class="doc-numlist" contenteditable="true">
+  <li>Pierwsza prośba lub punkt wniosku.</li>
+  <li>Druga prośba lub punkt wniosku.</li>
+  <li>Trzecia prośba lub punkt wniosku.</li>
 </ol>
 <div class="doc-spacer-md"></div>
 <p class="doc-para" contenteditable="true">Proszę o pozytywne rozpatrzenie niniejszego wniosku.</p>
 <div class="doc-spacer-md"></div>
 <div class="doc-meta" contenteditable="true">Z poważaniem,</div>
 <div class="doc-spacer-sm"></div>
-<div class="doc-signature-block" contenteditable="false">
-  <span class="doc-signature-line"></span>
-  <span class="doc-signature-label" contenteditable="true">Imię Nazwisko<br>Stanowisko</span>
+<div class="doc-sig-block" contenteditable="false">
+  <span class="doc-sig-line"></span>
+  <span class="doc-sig-label" contenteditable="true">Imię Nazwisko<br>Stanowisko</span>
 </div>`
 };
 
-// ===== ELEMENT SNIPPETS =====
-const ELEMENTS = {
-  'para': `<p class="doc-para" contenteditable="true">Nowy akapit tekstu.</p>`,
+// =====================================================================
+// DRAGGABLE TOOL DEFINITIONS
+// =====================================================================
+const TOOLS = [
+  { id:'para',      icon:'¶',  label:'Akapit tekstu',       html:`<p class="doc-para" contenteditable="true">Nowy akapit tekstu.</p>` },
+  { id:'title',     icon:'T',  label:'Tytuł / nagłówek',    html:`<div class="doc-title" contenteditable="true">TYTUŁ / NAGŁÓWEK</div>` },
+  { id:'inst',      icon:'🏛', label:'Nagłówek instytucji', html:`<div class="doc-inst" contenteditable="true">NAZWA INSTYTUCJI<br>DEPARTAMENT / WYDZIAŁ</div>` },
+  { id:'section',   icon:'§',  label:'Sekcja (I. Tytuł)',   html:`<div class="doc-section" contenteditable="true">I. TYTUŁ SEKCJI</div>` },
+  { id:'meta',      icon:'≡',  label:'Wiersz (DATA: ...)',  html:`<div class="doc-meta" contenteditable="true"><strong>ETYKIETA:</strong> .................................</div>` },
+  { id:'field',     icon:'_',  label:'Pole z etykietą',     html:`<div class="doc-field-row"><span class="doc-field-label" contenteditable="true">Etykieta:</span><div class="doc-field-line" contenteditable="true"></div></div>` },
+  { id:'line-only', icon:'⋯',  label:'Linia pusta',         html:`<div class="doc-line-only" contenteditable="true"></div>` },
+  { id:'indent',    icon:'❝',  label:'Blok z wcięciem',     html:`<div class="doc-indent"><p class="doc-para" contenteditable="true">Wcięty blok tekstu — cytaty, uzasadnienia, warunki.</p></div>` },
+  { id:'numlist',   icon:'1.', label:'Lista numerowana',    html:`<ol class="doc-numlist" contenteditable="true"><li>Pierwszy punkt.</li><li>Drugi punkt.</li><li>Trzeci punkt.</li></ol>` },
+  { id:'table',     icon:'⊞',  label:'Tabela (konfigurator)', html:'__TABLE__' },
+  { id:'hr',        icon:'—',  label:'Linia pozioma',       html:`<hr class="doc-hr">` },
+  { id:'spacer-sm', icon:'↕',  label:'Odstęp mały',         html:`<div class="doc-spacer-sm"></div>` },
+  { id:'spacer-md', icon:'↕',  label:'Odstęp średni',       html:`<div class="doc-spacer-md"></div>` },
+  { id:'spacer-lg', icon:'↕',  label:'Odstęp duży',         html:`<div class="doc-spacer-lg"></div>` },
+  { id:'sig',       icon:'✍',  label:'Blok podpisu',        html:`<div><div class="doc-sig-block" contenteditable="false"><span class="doc-sig-line"></span><span class="doc-sig-label" contenteditable="true">Imię Nazwisko<br>Stanowisko</span></div></div>` },
+];
 
-  'title': `<div class="doc-title" contenteditable="true">TYTUŁ / NAGŁÓWEK</div>`,
+const TEXT_STAMPS = [
+  { text:'TAJNE',    color:'red'  },
+  { text:'POUFNE',   color:'red'  },
+  { text:'KOPIA',    color:'blue' },
+  { text:'ORYGINAŁ', color:'blue' },
+  { text:'ANULOWANE',color:'red'  },
+  { text:'ZATWIERDZONE', color:'blue' },
+];
 
-  'header-inst': `<div class="doc-header-institution" contenteditable="true">NAZWA INSTYTUCJI<br>DEPARTAMENT / WYDZIAŁ</div>`,
-
-  'section': `<div class="doc-section-header" contenteditable="true">I. TYTUŁ SEKCJI</div>`,
-
-  'meta-row': `<div class="doc-meta" contenteditable="true"><b>ETYKIETA:</b> .................................</div>`,
-
-  'field': `<div class="doc-field-row">
-    <span class="doc-field-label" contenteditable="true">Etykieta:</span>
-    <div class="doc-field-dots" contenteditable="true"></div>
-  </div>`,
-
-  'dots-only': `<div class="doc-dots-only" contenteditable="true"></div>`,
-
-  'indent': `<div class="doc-indent-block">
-    <p class="doc-para" contenteditable="true">Wcięty blok tekstu – idealny na cytaty, uzasadnienia, warunki.</p>
-  </div>`,
-
-  'numlist': `<ol class="doc-numlist">
-    <li contenteditable="true">Pierwszy punkt listy.</li>
-    <li contenteditable="true">Drugi punkt listy.</li>
-    <li contenteditable="true">Trzeci punkt listy.</li>
-  </ol>`,
-
-  'table2': `<table class="doc-table">
-    <tr><th contenteditable="true">Kolumna A</th><th contenteditable="true">Kolumna B</th></tr>
-    <tr><td contenteditable="true">Wartość</td><td contenteditable="true">Wartość</td></tr>
-    <tr><td contenteditable="true">Wartość</td><td contenteditable="true">Wartość</td></tr>
-  </table>`,
-
-  'table3': `<table class="doc-table">
-    <tr><th contenteditable="true">Kolumna A</th><th contenteditable="true">Kolumna B</th><th contenteditable="true">Kolumna C</th></tr>
-    <tr><td contenteditable="true">Wartość</td><td contenteditable="true">Wartość</td><td contenteditable="true">Wartość</td></tr>
-    <tr><td contenteditable="true">Wartość</td><td contenteditable="true">Wartość</td><td contenteditable="true">Wartość</td></tr>
-  </table>`,
-
-  'hr': `<hr class="doc-hr">`,
-
-  'spacer-sm': `<div class="doc-spacer-sm"></div>`,
-  'spacer-md': `<div class="doc-spacer-md"></div>`,
-  'spacer-lg': `<div class="doc-spacer-lg"></div>`,
-
-  'signature': `<div style="margin-top:8px">
-    <div class="doc-signature-block" contenteditable="false">
-      <span class="doc-signature-line"></span>
-      <span class="doc-signature-label" contenteditable="true">Imię Nazwisko<br>Stanowisko</span>
-    </div>
-  </div>`
-};
-
-// ===== STATE =====
-let currentFont = 'font-courier';
-let currentTemplate = 'blank';
-let pendingModalAction = null;
-
-// ===== INIT =====
+// =====================================================================
+// INIT
+// =====================================================================
 function init() {
-  loadTemplate('blank');
+  buildToolList();
+  buildStampList();
+  loadTpl('blank', document.querySelector('.tpl-btn.active'), true);
 }
 
-// ===== TEMPLATE LOADING =====
-function loadTemplate(name, force = false) {
-  if (!force) {
-    const doc = document.getElementById('document');
-    const isEmpty = doc.innerText.trim().length < 2;
-    if (!isEmpty && name !== currentTemplate) {
-      showModal('template', name);
-      return;
-    }
-  }
-
-  currentTemplate = name;
-  const doc = document.getElementById('document');
-  doc.innerHTML = TEMPLATES[name] || TEMPLATES.blank;
-  doc.className = 'font-' + currentFont.replace('font-','');
-  doc.className = currentFont;
-
-  // Mark active template button
-  document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active'));
-  const idx = ['blank','pismo','raport','karta','wniosek'].indexOf(name);
-  if (idx >= 0) document.querySelectorAll('.template-btn')[idx].classList.add('active');
-
-  updateStatus();
-  doc.focus();
+function buildToolList() {
+  const list = document.getElementById('tool-list');
+  list.innerHTML = '';
+  TOOLS.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'tool-item';
+    el.draggable = true;
+    el.dataset.toolId = t.id;
+    el.innerHTML = `<span class="ti">${t.icon}</span>${t.label}`;
+    el.addEventListener('dragstart', e => {
+      e.dataTransfer.setData('tool-id', t.id);
+      e.dataTransfer.effectAllowed = 'copy';
+      el.classList.add('dragging');
+      document.getElementById('drag-hint').classList.add('active');
+    });
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+      document.getElementById('drag-hint').classList.remove('active');
+    });
+    list.appendChild(el);
+  });
 }
 
-// ===== INSERT ELEMENTS =====
-function insertElement(type) {
-  const html = ELEMENTS[type];
-  if (!html) return;
+function buildStampList() {
+  const list = document.getElementById('stamp-list');
+  list.innerHTML = '';
 
-  const doc = document.getElementById('document');
-  const sel = window.getSelection();
-  let inserted = false;
+  // Text stamps
+  TEXT_STAMPS.forEach(s => {
+    appendStampItem(list, s.text, s.color, 'text');
+  });
 
-  if (sel && sel.rangeCount > 0) {
-    const range = sel.getRangeAt(0);
-    // Check if selection is inside our document
-    if (doc.contains(range.commonAncestorContainer)) {
-      // Find the top-level child of doc that contains the cursor
-      let node = range.commonAncestorContainer;
-      while (node.parentElement && node.parentElement !== doc) {
-        node = node.parentElement;
-      }
-      if (node.parentElement === doc) {
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = html;
-        // Insert all children after the current node
-        const frag = document.createDocumentFragment();
-        while (wrapper.firstChild) frag.appendChild(wrapper.firstChild);
-        node.after(frag);
-        inserted = true;
-      }
-    }
-  }
-
-  if (!inserted) {
-    doc.insertAdjacentHTML('beforeend', html);
-  }
-
-  updateStatus();
-  doc.focus();
+  // Asset stamps (image PNGs)
+  ASSET_STAMPS.forEach(name => {
+    appendStampItem(list, name, null, 'img', `assets/${name}.png`);
+  });
 }
 
-// ===== STAMPS =====
-function insertStamp(text, color) {
-  const html = `<div class="doc-stamp-wrap"><span class="doc-stamp ${color}" contenteditable="false">${text}</span></div>`;
-  const doc = document.getElementById('document');
-  const sel = window.getSelection();
-  let inserted = false;
+function appendStampItem(list, text, color, type, src) {
+  const el = document.createElement('div');
+  el.className = 'stamp-item';
+  el.draggable = true;
+  el.dataset.stampType = type;
+  el.dataset.stampText = text;
+  el.dataset.stampColor = color || '';
+  el.dataset.stampSrc = src || '';
 
-  if (sel && sel.rangeCount > 0) {
-    const range = sel.getRangeAt(0);
-    if (doc.contains(range.commonAncestorContainer)) {
-      let node = range.commonAncestorContainer;
-      while (node.parentElement && node.parentElement !== doc) node = node.parentElement;
-      if (node.parentElement === doc) {
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = html;
-        node.before(wrapper.firstChild);
-        inserted = true;
-      }
-    }
+  let preview = '';
+  if (type === 'img') {
+    preview = `<div class="stamp-preview img">🖼</div>`;
+  } else {
+    preview = `<div class="stamp-preview ${color}">${text}</div>`;
   }
-  if (!inserted) doc.insertAdjacentHTML('afterbegin', html);
-  updateStatus();
+  el.innerHTML = `${preview}<span style="font-size:11px">${type==='img'?text+'.png':text}</span>`;
+
+  el.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('stamp-type', type);
+    e.dataTransfer.setData('stamp-text', text);
+    e.dataTransfer.setData('stamp-color', color || '');
+    e.dataTransfer.setData('stamp-src', src || '');
+    e.dataTransfer.effectAllowed = 'copy';
+    el.classList.add('dragging');
+    document.getElementById('drag-hint').classList.add('active');
+  });
+  el.addEventListener('dragend', () => {
+    el.classList.remove('dragging');
+    document.getElementById('drag-hint').classList.remove('active');
+  });
+  list.appendChild(el);
 }
 
-function promptCustomStamp() {
+// Custom text stamp
+function addCustomStamp() {
   const text = prompt('Tekst stempla (np. DO RĄK WŁASNYCH):');
   if (!text) return;
-  const colorChoice = confirm('Czerwony? (OK = czerwony, Anuluj = niebieski)');
-  insertStamp(text.toUpperCase(), colorChoice ? 'red' : 'blue');
+  const colorOk = confirm('OK = czerwony stempel\nAnuluj = niebieski stempel');
+  const color = colorOk ? 'red' : 'blue';
+  TEXT_STAMPS.push({ text: text.toUpperCase(), color });
+  buildStampList();
 }
 
-// ===== FONT =====
-function changeFont(val) {
-  currentFont = val;
+// =====================================================================
+// TEMPLATE LOADING
+// =====================================================================
+function loadTpl(name, btn, force) {
   const doc = document.getElementById('document');
-  doc.className = val;
+  const notEmpty = doc.innerText.trim().length > 2;
+  if (!force && notEmpty) {
+    showConfirm('Załadować szablon?',
+      'Dokument zawiera treść. Załadowanie szablonu zastąpi całą zawartość.',
+      () => { applyTpl(name, btn); }
+    );
+    return;
+  }
+  applyTpl(name, btn);
 }
 
-// ===== STATUS BAR =====
+function applyTpl(name, btn) {
+  const doc = document.getElementById('document');
+  saveUndo();
+  doc.innerHTML = TEMPLATES[name] || TEMPLATES.blank;
+  updateStatus();
+  document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  doc.focus();
+}
+
+// =====================================================================
+// DRAG & DROP INTO DOCUMENT
+// =====================================================================
+let dropIndicator = null;
+let dropTarget = null; // element after which to insert
+
+function onDocDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  document.getElementById('document').classList.add('drag-over');
+
+  const doc = document.getElementById('document');
+  const y = e.clientY;
+
+  // Find the child element closest to cursor
+  const children = Array.from(doc.children);
+  let best = null, bestDist = Infinity, insertAfter = null;
+
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i];
+    const rect = child.getBoundingClientRect();
+    const midY = rect.top + rect.height / 2;
+    const dist = Math.abs(y - midY);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = child;
+      insertAfter = y > midY ? child : (children[i-1] || null);
+    }
+  }
+
+  // Show drop indicator
+  removeDropIndicator();
+  const indicator = document.createElement('div');
+  indicator.className = 'drop-line';
+  indicator.id = 'drop-indicator';
+
+  if (!insertAfter) {
+    doc.insertBefore(indicator, doc.firstChild);
+  } else {
+    insertAfter.after(indicator);
+  }
+  dropTarget = insertAfter;
+}
+
+function onDocDragLeave(e) {
+  if (!document.getElementById('document').contains(e.relatedTarget)) {
+    document.getElementById('document').classList.remove('drag-over');
+    removeDropIndicator();
+    dropTarget = null;
+  }
+}
+
+function removeDropIndicator() {
+  const old = document.getElementById('drop-indicator');
+  if (old) old.remove();
+}
+
+function onDocDrop(e) {
+  e.preventDefault();
+  document.getElementById('document').classList.remove('drag-over');
+
+  const toolId = e.dataTransfer.getData('tool-id');
+  const stampType = e.dataTransfer.getData('stamp-type');
+
+  saveUndo();
+
+  if (toolId) {
+    if (toolId === 'table') {
+      // Show table modal, remember drop position
+      pendingDropTarget = dropTarget;
+      removeDropIndicator();
+      openTblModal();
+      return;
+    }
+    const tool = TOOLS.find(t => t.id === toolId);
+    if (tool) insertHTMLAtDrop(tool.html, dropTarget);
+  } else if (stampType) {
+    const text = e.dataTransfer.getData('stamp-text');
+    const color = e.dataTransfer.getData('stamp-color');
+    const src = e.dataTransfer.getData('stamp-src');
+    const html = buildStampHTML(stampType, text, color, src);
+    insertHTMLAtDrop(html, dropTarget);
+  }
+
+  removeDropIndicator();
+  dropTarget = null;
+  updateStatus();
+}
+
+function insertHTMLAtDrop(html, afterEl) {
+  const doc = document.getElementById('document');
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = html;
+  const frag = document.createDocumentFragment();
+  while (wrapper.firstChild) frag.appendChild(wrapper.firstChild);
+
+  if (!afterEl) {
+    doc.insertBefore(frag, doc.firstChild);
+  } else if (doc.contains(afterEl)) {
+    afterEl.after(frag);
+  } else {
+    doc.appendChild(frag);
+  }
+}
+
+function buildStampHTML(type, text, color, src) {
+  const rot = (Math.random() * 18 - 9).toFixed(1); // -9° to +9°
+  const tx = (Math.random() * 20 - 10).toFixed(0); // ±10px
+  const ty = (Math.random() * 10 - 5).toFixed(0);  // ±5px
+  const transform = `rotate(${rot}deg) translate(${tx}px,${ty}px)`;
+
+  if (type === 'img') {
+    return `<div class="doc-stamp-wrap"><div class="doc-stamp-img" style="transform:${transform};display:inline-block"><img src="${src}" alt="${text}"></div></div>`;
+  } else {
+    return `<div class="doc-stamp-wrap"><span class="doc-stamp-txt ${color}" contenteditable="false" style="transform:${transform};display:inline-block">${text}</span></div>`;
+  }
+}
+
+// =====================================================================
+// TABLE MODAL
+// =====================================================================
+let pendingDropTarget = null;
+
+function openTblModal() {
+  document.getElementById('tbl-modal').classList.add('open');
+}
+function closeTblModal() {
+  document.getElementById('tbl-modal').classList.remove('open');
+  pendingDropTarget = null;
+}
+function confirmTable() {
+  const cols = Math.max(1, Math.min(10, parseInt(document.getElementById('tbl-cols').value) || 3));
+  const rows = Math.max(1, Math.min(20, parseInt(document.getElementById('tbl-rows').value) || 3));
+  const header = document.getElementById('tbl-header').checked;
+
+  let html = `<table class="doc-table">`;
+  for (let r = 0; r < rows; r++) {
+    html += '<tr>';
+    for (let c = 0; c < cols; c++) {
+      if (r === 0 && header) {
+        html += `<th contenteditable="true">Kolumna ${c+1}</th>`;
+      } else {
+        html += `<td contenteditable="true">${r===0&&!header?`Kolumna ${c+1}`:''}</td>`;
+      }
+    }
+    html += '</tr>';
+  }
+  html += `</table>`;
+
+  insertHTMLAtDrop(html, pendingDropTarget);
+  closeTblModal();
+  updateStatus();
+}
+
+// Close table modal on overlay click
+document.getElementById('tbl-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeTblModal();
+});
+
+// =====================================================================
+// CONFIRM MODAL
+// =====================================================================
+let confirmCallback = null;
+function showConfirm(title, body, cb) {
+  document.getElementById('cm-title').textContent = title;
+  document.getElementById('cm-body').textContent = body;
+  confirmCallback = cb;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function closeConfirm() {
+  document.getElementById('confirm-modal').classList.remove('open');
+  confirmCallback = null;
+}
+document.getElementById('cm-ok').onclick = function() {
+  closeConfirm();
+  if (confirmCallback) confirmCallback();
+};
+document.getElementById('confirm-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
+function confirmClear() {
+  showConfirm('Nowy dokument', 'Czy na pewno chcesz wyczyścić cały dokument? Tej operacji nie można cofnąć.', () => {
+    applyTpl('blank', document.querySelector('.tpl-btn'));
+    document.querySelectorAll('.tpl-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tpl-btn')[0].classList.add('active');
+  });
+}
+
+// =====================================================================
+// FORMAT TOOLBAR
+// =====================================================================
+function fmtExec(cmd, val) {
+  document.getElementById('document').focus();
+  document.execCommand(cmd, false, val || null);
+  updateFmtState();
+}
+function fmtFont(val) {
+  document.getElementById('document').style.fontFamily = val;
+}
+function fmtSize(val) {
+  document.getElementById('document').style.fontSize = val;
+}
+function fmtColor(val) {
+  document.execCommand('foreColor', false, val);
+}
+
+function updateFmtState() {
+  document.getElementById('btn-bold').classList.toggle('active', document.queryCommandState('bold'));
+  document.getElementById('btn-italic').classList.toggle('active', document.queryCommandState('italic'));
+  document.getElementById('btn-underline').classList.toggle('active', document.queryCommandState('underline'));
+  document.getElementById('btn-strike').classList.toggle('active', document.queryCommandState('strikeThrough'));
+}
+
+// =====================================================================
+// STATUS BAR
+// =====================================================================
 function updateStatus() {
   const doc = document.getElementById('document');
   const text = doc.innerText || '';
@@ -1099,141 +1053,78 @@ function updateStatus() {
   document.getElementById('stat-words').textContent = text.trim() ? text.trim().split(/\s+/).length : 0;
 }
 
-// ===== MODAL =====
-function showModal(type, data) {
-  const overlay = document.getElementById('modal-overlay');
-  const title = document.getElementById('modal-title');
-  const body = document.getElementById('modal-body');
-  const btn = document.getElementById('modal-confirm-btn');
-
-  if (type === 'clear') {
-    title.textContent = 'Nowy dokument';
-    body.textContent = 'Czy na pewno chcesz wyczyścić cały dokument? Tej operacji nie można cofnąć.';
-    btn.textContent = 'Wyczyść';
-    btn.onclick = () => { loadTemplate('blank', true); closeModal(); };
-  } else if (type === 'template') {
-    title.textContent = 'Załadować szablon?';
-    body.textContent = 'Dokument zawiera już treść. Załadowanie szablonu zastąpi całą zawartość. Czy kontynuować?';
-    btn.textContent = 'Załaduj';
-    btn.onclick = () => { loadTemplate(data, true); closeModal(); };
-  }
-
-  overlay.classList.add('open');
-}
-
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-}
-document.getElementById('modal-overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
+// =====================================================================
+// KEYBOARD SHORTCUTS
+// =====================================================================
+document.addEventListener('keydown', function(e) {
+  const mod = e.ctrlKey || e.metaKey;
+  if (mod && e.key === 'z' && !e.shiftKey) { e.preventDefault(); doUndo(); }
+  if (mod && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); doRedo(); }
+  if (mod && e.key === 'p') { e.preventDefault(); exportPDF(); }
+  if (e.key === 'Escape') { closeTblModal(); closeConfirm(); }
 });
 
-// ===== EXPORT PNG =====
+// Track changes in document for undo
+let undoTimer = null;
+document.getElementById('document').addEventListener('input', function() {
+  clearTimeout(undoTimer);
+  undoTimer = setTimeout(saveUndo, 600);
+  updateStatus();
+});
+
+// =====================================================================
+// EXPORT PNG
+// =====================================================================
 async function exportPNG() {
-  const btn = event.target.closest('button');
-  btn.textContent = '⏳ Generuję...';
+  const btn = document.querySelector('.tbtn:not(.primary)');
+  const orig = btn.innerHTML;
+  btn.textContent = '⏳...';
   btn.disabled = true;
-
-  // Temporarily remove contenteditable outlines
   const doc = document.getElementById('document');
-  doc.setAttribute('data-exporting', '1');
-
-  try {
-    const canvas = await html2canvas(document.getElementById('document'), {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#f5f0e8',
-      logging: false,
-      width: doc.offsetWidth,
-      height: doc.offsetHeight,
-    });
-
-    const link = document.createElement('a');
-    link.download = 'dokument-larp.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  } catch(e) {
-    alert('Błąd eksportu: ' + e.message);
-  } finally {
-    doc.removeAttribute('data-exporting');
-    btn.disabled = false;
-    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9l4-4 4 4 5-5 5 5"/><circle cx="8.5" cy="13.5" r="1.5"/></svg> PNG`;
-  }
-}
-
-// ===== EXPORT PDF =====
-async function exportPDF() {
-  const btn = event.target.closest('button');
-  const origHTML = btn.innerHTML;
-  btn.textContent = '⏳ Generuję...';
-  btn.disabled = true;
-
-  const doc = document.getElementById('document');
-
   try {
     const canvas = await html2canvas(doc, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#f5f0e8',
-      logging: false,
-      width: doc.offsetWidth,
-      height: doc.offsetHeight,
+      scale: 2, useCORS: true, backgroundColor: '#f4efe5',
+      logging: false, width: doc.offsetWidth, height: doc.offsetHeight,
     });
-
-    const { jsPDF } = window.jspdf;
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-    // A4 = 210mm x 297mm
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pdfW = pdf.internal.pageSize.getWidth();
-    const pdfH = pdf.internal.pageSize.getHeight();
-
-    // Scale image to fit width
-    const imgW = canvas.width;
-    const imgH = canvas.height;
-    const ratio = imgW / imgH;
-    const pageRatio = pdfW / pdfH;
-
-    let drawW = pdfW;
-    let drawH = pdfW / ratio;
-
-    // If content taller than one page, scale down to fit
-    if (drawH > pdfH) {
-      drawH = pdfH;
-      drawW = pdfH * ratio;
-    }
-
-    pdf.addImage(imgData, 'JPEG', (pdfW - drawW) / 2, 0, drawW, drawH);
-    pdf.save('dokument-larp.pdf');
-  } catch(e) {
-    alert('Błąd eksportu PDF: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = origHTML;
-  }
+    const a = document.createElement('a');
+    a.download = 'dokument-larp.png';
+    a.href = canvas.toDataURL('image/png');
+    a.click();
+  } catch(e) { alert('Błąd eksportu PNG: ' + e.message); }
+  finally { btn.innerHTML = orig; btn.disabled = false; }
 }
 
-// ===== KEYBOARD SHORTCUTS =====
-document.addEventListener('keydown', function(e) {
-  if (e.ctrlKey || e.metaKey) {
-    if (e.key === 'p') {
-      e.preventDefault();
-      exportPDF();
-    }
-  }
-  if (e.key === 'Escape') closeModal();
-});
+// =====================================================================
+// EXPORT PDF
+// =====================================================================
+async function exportPDF() {
+  const btn = document.querySelector('.tbtn.primary');
+  const orig = btn.innerHTML;
+  btn.textContent = '⏳...';
+  btn.disabled = true;
+  const doc = document.getElementById('document');
+  try {
+    const canvas = await html2canvas(doc, {
+      scale: 2, useCORS: true, backgroundColor: '#f4efe5',
+      logging: false, width: doc.offsetWidth, height: doc.offsetHeight,
+    });
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pW = pdf.internal.pageSize.getWidth();
+    const pH = pdf.internal.pageSize.getHeight();
+    const imgRatio = canvas.width / canvas.height;
+    let drawW = pW, drawH = pW / imgRatio;
+    if (drawH > pH) { drawH = pH; drawW = pH * imgRatio; }
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', (pW-drawW)/2, 0, drawW, drawH);
+    pdf.save('dokument-larp.pdf');
+  } catch(e) { alert('Błąd eksportu PDF: ' + e.message); }
+  finally { btn.innerHTML = orig; btn.disabled = false; }
+}
 
-// ===== PREVENT default drag on stamps =====
-document.getElementById('document').addEventListener('dragstart', function(e) {
-  if (e.target.classList && e.target.classList.contains('doc-stamp')) {
-    e.preventDefault();
-  }
-});
-
-// ===== START =====
+// =====================================================================
+// START
+// =====================================================================
 init();
 </script>
-
 </body>
 </html>
